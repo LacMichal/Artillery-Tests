@@ -1,0 +1,38 @@
+config:
+  target: "https://free-apis.github.io/"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: Artillery Tests
+  payload:
+    - path: "keywords.csv"
+      fields:
+        - "keyword1"
+        - "keyword2"
+      order: sequence
+  ensure:
+    thresholds:
+      - http_response_time_p95: 1000
+      - http_request_rate: 10
+      - http_response_time_max: 1000
+
+scenarios:
+  - name: Getting a resource
+    flow:
+      - get:
+          url: "{{ target }}get?param1=sample_value_for_keyword1"
+          capture:
+            - json: "$.getResponseTime"
+              as: "get_response_time"
+            - json: "$.getRequestRate"
+              as: "get_request_rate"
+      - post:
+          url: "{{ target }}post?param2=sample_value_for_keyword2"
+          json:
+            keyword1: "sample_value_for_keyword1"
+            keyword2: "sample_value_for_keyword2"
+          capture:
+            - json: "$.postResponseTime"
+              as: "post_response_time"
+            - json: "$.postRequestRate"
+              as: "post_request_rate"
